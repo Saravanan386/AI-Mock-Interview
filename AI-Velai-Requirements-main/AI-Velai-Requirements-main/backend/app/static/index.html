@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vellei Mock Interview</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <div class="bg-orb bg-orb-a"></div>
+  <div class="bg-orb bg-orb-b"></div>
+  <main class="app-shell">
+    <header class="topbar panel">
+      <div>
+        <div class="eyebrow">AI Mock Interview Platform</div>
+        <h1>Mock Interview and Assessment</h1>
+        <p class="lede">
+          Role-based interview flow with live scoring, feedback, and final report. Keep it focused, answer like a real interview, and move turn by turn.
+        </p>
+      </div>
+      <div class="topbar-actions">
+        <a class="button button-secondary" href="/docs" target="_blank" rel="noreferrer">Swagger</a>
+        <button class="button button-ghost" type="button" id="refresh-roles">Refresh roles</button>
+      </div>
+      <div id="session-message" class="session-message" aria-live="polite"></div>
+    </header>
+
+    <section class="layout">
+      <aside class="sidebar">
+        <section class="panel card">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Access</div>
+              <h2>Login or register</h2>
+            </div>
+          </div>
+          <div class="auth-grid">
+            <form id="company-form" class="form-card">
+              <h3>Company</h3>
+              <label>Email <input name="email" type="email" placeholder="company@vellei.ai" required /></label>
+              <label>Password <input name="password" type="password" placeholder="Minimum 8 characters" required /></label>
+              <div class="button-row">
+                <button class="button button-primary" type="submit" data-action="register-company">Register</button>
+                <button class="button button-ghost" type="submit" data-action="login-company">Login</button>
+              </div>
+            </form>
+
+            <form id="candidate-form" class="form-card">
+              <h3>Candidate</h3>
+              <label>Full name <input name="full_name" type="text" placeholder="Saravanan" required /></label>
+              <label>Email <input name="email" type="email" placeholder="candidate@vellei.ai" required /></label>
+              <label>Password <input name="password" type="password" placeholder="Minimum 8 characters" required /></label>
+              <div class="button-row">
+                <button class="button button-primary" type="submit" data-action="register-candidate">Register</button>
+                <button class="button button-ghost" type="submit" data-action="login-candidate">Login</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section class="panel card">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Role setup</div>
+              <h2>Create a role</h2>
+            </div>
+          </div>
+          <form id="job-form" class="job-form">
+            <div class="field-grid">
+              <label>Title <input name="title" type="text" placeholder="AI Engineer" required /></label>
+              <label>Department <input name="department" type="text" placeholder="Engineering" /></label>
+              <label>Location <input name="location" type="text" placeholder="Chennai / Remote" /></label>
+              <label>Employment type <input name="employment_type" type="text" placeholder="Full-time" /></label>
+              <label>Seniority <input name="seniority" type="text" placeholder="Mid" /></label>
+              <label class="wide">Skills <input name="skills" type="text" placeholder="Python, FastAPI, LLM, RAG" /></label>
+            </div>
+            <label>Job description / context
+              <textarea name="simple_input" rows="5" placeholder="Paste the real JD or hiring brief here." required></textarea>
+            </label>
+            <div class="button-row">
+              <button class="button button-primary" type="submit">Create role</button>
+              <button class="button button-ghost" type="button" id="load-sample">Load sample text</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel card">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Roles</div>
+              <h2>Available jobs</h2>
+            </div>
+          </div>
+          <div id="role-list" class="role-list"></div>
+        </section>
+      </aside>
+
+      <section class="main">
+        <section class="panel interview-shell">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Interview</div>
+              <h2 id="role-title">Choose a role to begin</h2>
+              <p id="role-description" class="muted">
+                Pick a job from the list to start assessment or mock interview.
+              </p>
+            </div>
+            <div id="role-badge" class="badge">No role selected</div>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-card">
+              <span class="tiny-label">Assessment questions</span>
+              <strong id="role-assessment-count">0</strong>
+            </div>
+            <div class="detail-card">
+              <span class="tiny-label">Mock interview</span>
+              <strong id="role-mock-availability">Ready</strong>
+            </div>
+            <div class="detail-card">
+              <span class="tiny-label">Skills</span>
+              <strong id="role-skills">-</strong>
+            </div>
+          </div>
+
+          <div class="button-row top-gap">
+            <button class="button button-primary" id="start-assessment" type="button">Start assessment</button>
+            <button class="button button-secondary" id="start-mock" type="button">Start mock interview</button>
+            <button class="button button-ghost" id="finish-session" type="button">End session</button>
+          </div>
+
+          <div class="question-card">
+            <div class="question-head">
+              <span class="section-kicker">Current question</span>
+              <span id="question-index" class="badge">0 / 0</span>
+            </div>
+            <p id="question-text" class="question-text">Select a role and start a session to see the first question.</p>
+            <div class="question-meta">
+              <span id="question-competency" class="chip">Competency: -</span>
+              <span id="question-difficulty" class="chip">Difficulty: -</span>
+            </div>
+          </div>
+
+          <label class="answer-box">Your answer
+            <textarea id="answer-input" rows="8" placeholder="Answer like you are in a real interview."></textarea>
+          </label>
+
+          <div class="button-row">
+            <button class="button button-primary" id="submit-answer" type="button">Submit answer</button>
+            <button class="button button-ghost" id="clear-answer" type="button">Clear</button>
+          </div>
+        </section>
+
+        <section class="panel result-shell">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Result</div>
+              <h2>Live feedback</h2>
+            </div>
+            <button class="button button-ghost slim" id="clear-transcript" type="button">Reset view</button>
+          </div>
+
+          <div class="result-grid">
+            <div class="result-card">
+              <span class="tiny-label">Status</span>
+              <strong id="result-status">No result yet</strong>
+            </div>
+            <div class="result-card">
+              <span class="tiny-label">Score</span>
+              <strong id="result-score">-</strong>
+            </div>
+            <div class="result-card">
+              <span class="tiny-label">Recommendation</span>
+              <strong id="result-recommendation">-</strong>
+            </div>
+          </div>
+
+          <div id="result-details" class="result-details muted">
+            Finish a session to see the score summary and feedback.
+          </div>
+
+          <div class="transcript-head">
+            <div class="section-kicker">Transcript</div>
+          </div>
+          <div id="transcript" class="transcript"></div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>
